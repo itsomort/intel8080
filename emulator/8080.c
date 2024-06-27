@@ -92,40 +92,26 @@ void step(intel8080* state) {
     // SINGLE REGISTER INSTRUCTIONS
 
     // INR = increment register
+    // DCR = decrement register
     if(((opcode & 0b11000111) ^ icsr) == 0 || ((opcode & 0b11000111) ^ dcsr) == 0) {
         // 000 = B, 001 = C, 010 = D, 011 = E, 100 = H, 101 = L, 110 = mem, 111 = A
+        uint8_t *registers[8] = {
+            &state->B, &state->C,
+            &state->D, &state->E,
+            &state->H, &state->L,
+            NULL,      &state->A
+        };
+        
         // if incrementing
         int add = 1;
         // if decrementing
         if(opcode & 0b00000001 == 1) add = -1;
         
         uint8_t reg = (opcode & 0b00111000) >> 3;
-        uint8_t *registers[8] = {
-            &state->B, &state->C,
-            &state->D, &state->E,
-            &state->H, &state->L,
-            NULL,      &state->A
-        };
+        
     
         if(reg == 6) state->MEMORY[(state->H << 8) + state->L] += add;
         else *registers[reg] += add;
-
-        state->PC += 1;
-        return;
-    }
-    // DCR = decrement register
-    if(((opcode & 0b11000111) ^ dcsr) == 0) {
-        // 000 = B, 001 = C, 010 = D, 011 = E, 100 = H, 101 = L, 110 = mem, 111 = A
-        uint8_t reg = (opcode & 0b00111000) >> 3;
-        uint8_t *registers[8] = {
-            &state->B, &state->C,
-            &state->D, &state->E,
-            &state->H, &state->L,
-            NULL,      &state->A
-        };
-    
-        if(reg == 6) state->MEMORY[(state->H << 8) + state->L] -= 1;
-        else *registers[reg] -= 1;
 
         state->PC += 1;
         return;

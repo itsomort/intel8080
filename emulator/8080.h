@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 typedef struct {
@@ -12,11 +13,11 @@ typedef struct {
     uint8_t L;
 
     // FLAGS
-    uint8_t S; // sign
-    uint8_t Z; // zero
-    uint8_t AC; // auxillary carry (unused)
-    uint8_t P; // parity
-    uint8_t C; // carry
+    bool S; // sign
+    bool Z; // zero
+    bool AC; // auxillary carry (unused)
+    bool P; // parity
+    bool CF; // carry
 
     // STACK POINTER + PROGRAM COUNTER
     uint16_t SP;
@@ -24,6 +25,7 @@ typedef struct {
 
     // MAIN MEMORY
     uint8_t* MEMORY;
+
 } intel8080;
 
 intel8080* cpu_init();
@@ -31,3 +33,4 @@ void step(intel8080* state);
 void load_program(intel8080* state, const uint8_t* program, size_t size);
 uint8_t read_byte(intel8080* state, uint16_t address);
 void write_byte(intel8080* state, uint8_t byte, uint16_t address);
+void status(intel8080* state);

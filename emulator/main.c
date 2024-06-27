@@ -6,10 +6,11 @@ int main() {
     intel8080* state = cpu_init();
     int size = 3;
 
-    load_program(state, complement, size);
+    load_program(state, decrement_reg, size);
     status(state);
     for(int i = 0; i < size; i++) {
         step(state);
         status(state);
     }
+    printf("%x\n", state->MEMORY[(state->H << 8) + state->L]);
 }

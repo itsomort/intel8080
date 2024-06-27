@@ -37,7 +37,7 @@ void status(intel8080* state) {
     printf("P: %d | C: %d\n", state->P, state->CF);
     
     printf("JUST EXECUTED:\n");
-    if(state->SP == 0) printf("no instructions yet");
+    if(state->PC == 0) printf("no instructions yet\n");
     else printf("0x%02x\n", state->MEMORY[state->PC - 1]);
 
     printf("NEXT INSTRUCTION:\n");
@@ -82,12 +82,8 @@ void step(intel8080* state) {
     // CARRY BIT INSTRUCTIONS
     if(((opcode & 0b11110111) ^ crbi) == 0) {
         // 00110111 == STC, // 00111111 == CMC
-        if(opcode & 0b00001000 == 0) { // STC = set carry = 1
-            state->CF = true;
-        } 
-        else { // CMC = invert carry flag
-            state->CF = !(state->CF);
-        }
+        if(opcode & 0b00001000 == 0) state->CF = true; // STC = set carry = 1
+        else state->CF = !(state->CF); // CMC = invert carry flag
 
         state->PC += 1;
         return;
@@ -96,18 +92,23 @@ void step(intel8080* state) {
     // SINGLE REGISTER INSTRUCTIONS
 
     // INR = increment register
-    if(((opcode & 0b11000111) ^ icsr) == 0) {
+    if(((opcode & 0b11000111) ^ icsr) == 0 || ((opcode & 0b11000111) ^ dcsr) == 0) {
         // 000 = B, 001 = C, 010 = D, 011 = E, 100 = H, 101 = L, 110 = mem, 111 = A
+        // if incrementing
+        int add = 1;
+        // if decrementing
+        if(opcode & 0b00000001 == 1) add = -1;
+        
         uint8_t reg = (opcode & 0b00111000) >> 3;
-        if(reg == 0) state->B += 1;
-        else if(reg == 1) state->C += 1;
-        else if(reg == 2) state->D += 1;
-        else if(reg == 3) state->E += 1;
-        else if(reg == 4) state->H += 1;
-        else if(reg == 5) state->L += 1;
-        // increment byte at memory pointed to by H/L
-        else if(reg == 6) state->MEMORY[(state->H << 8) + state->L] += 1;
-        else if(reg == 7) state->A += 1;
+        uint8_t *registers[8] = {
+            &state->B, &state->C,
+            &state->D, &state->E,
+            &state->H, &state->L,
+            NULL,      &state->A
+        };
+    
+        if(reg == 6) state->MEMORY[(state->H << 8) + state->L] += add;
+        else *registers[reg] += add;
 
         state->PC += 1;
         return;
@@ -116,15 +117,15 @@ void step(intel8080* state) {
     if(((opcode & 0b11000111) ^ dcsr) == 0) {
         // 000 = B, 001 = C, 010 = D, 011 = E, 100 = H, 101 = L, 110 = mem, 111 = A
         uint8_t reg = (opcode & 0b00111000) >> 3;
-        if(reg == 0) state->B -= 1;
-        else if(reg == 1) state->C -= 1;
-        else if(reg == 2) state->D -= 1;
-        else if(reg == 3) state->E -= 1;
-        else if(reg == 4) state->H -= 1;
-        else if(reg == 5) state->L -= 1;
-        // increment byte at memory pointed to by H/L
-        else if(reg == 6) state->MEMORY[(state->H << 8) + state->L] -= 1;
-        else if(reg == 7) state->A -= 1;
+        uint8_t *registers[8] = {
+            &state->B, &state->C,
+            &state->D, &state->E,
+            &state->H, &state->L,
+            NULL,      &state->A
+        };
+    
+        if(reg == 6) state->MEMORY[(state->H << 8) + state->L] -= 1;
+        else *registers[reg] -= 1;
 
         state->PC += 1;
         return;
@@ -134,6 +135,27 @@ void step(intel8080* state) {
     if(opcode == cmac) {
         state->A = ~state->A;
         
+        state->PC += 1;
+        return;
+    }
+
+    // MOV = move byte from src to dest
+    // dest == src == 110 canot happen, 0b01110110 == HLT
+    if(((opcode & 0b11000000) ^ move) == 0 && (opcode != 0b01110110)) {
+        uint8_t *registers[8] = {
+            &state->B, &state->C,
+            &state->D, &state->E,
+            &state->H, &state->L,
+            NULL,      &state->A
+        };
+
+        uint8_t dest = (opcode & 0b00111000) >> 3;
+        uint8_t src = (opcode & 0b00000111);
+
+        if(src == 6) *registers[dest] = state->MEMORY[(state->H << 8) + state->L];
+        else if(dest == 6) state->MEMORY[(state->H << 8) + state->L] = *registers[src];
+        else *registers[dest] = *registers[src];
+
         state->PC += 1;
         return;
     }

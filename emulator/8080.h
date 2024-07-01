@@ -31,6 +31,4 @@ typedef struct {
 intel8080* cpu_init();
 void step(intel8080* state);
 void load_program(intel8080* state, const uint8_t* program, size_t size);
-uint8_t read_byte(intel8080* state, uint16_t address);
-void write_byte(intel8080* state, uint8_t byte, uint16_t address);
 void status(intel8080* state);

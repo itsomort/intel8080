@@ -16,14 +16,6 @@ void load_program(intel8080* state, const uint8_t* program, size_t size) {
     }
 }
 
-uint8_t read_byte(intel8080* state, uint16_t address) {
-    return state->MEMORY[address];
-}
-
-void write_byte(intel8080* state, uint8_t byte, uint16_t address) {
-    state->MEMORY[address] = byte;
-}
-
 void status(intel8080* state) {
     printf("REGISTERS:\n");
     printf("A: 0x%02x\n", state->A);
@@ -46,7 +38,7 @@ void status(intel8080* state) {
 
 void step(intel8080* state) {
     // fetch, decode, execute
-    uint8_t opcode = read_byte(state, state->PC); // get opcode
+    uint8_t opcode = state->MEMORY[state->PC]; // get opcode
 
     if(opcode == 0) { // NOP
         state->PC += 1;
@@ -85,8 +77,7 @@ void step(intel8080* state) {
         if(opcode & 0b00001000 == 0) state->CF = true; // STC = set carry = 1
         else state->CF = !(state->CF); // CMC = invert carry flag
 
-        state->PC += 1;
-        return;
+        goto increment;
     }
     
     // SINGLE REGISTER INSTRUCTIONS
@@ -113,16 +104,14 @@ void step(intel8080* state) {
         if(reg == 6) state->MEMORY[(state->H << 8) + state->L] += add;
         else *registers[reg] += add;
 
-        state->PC += 1;
-        return;
+        goto increment;
     }
 
     // CMA = complement accumulator
     if(opcode == cmac) {
         state->A = ~state->A;
         
-        state->PC += 1;
-        return;
+        goto increment;
     }
 
     // MOV = move byte from src to dest
@@ -142,7 +131,26 @@ void step(intel8080* state) {
         else if(dest == 6) state->MEMORY[(state->H << 8) + state->L] = *registers[src];
         else *registers[dest] = *registers[src];
 
-        state->PC += 1;
-        return;
+        goto increment;
     }
+
+    // STAX = accumulator -> memory pointed to by B/C or D/E
+    // LDAX = memory pointed to by B/C or D/E -> accumulator
+    if(((opcode & 0b11100111) ^ stld) == 0) {
+        // get memory location
+        // 0000X010 = B/C, 0001X010 = D/E
+        uint16_t mem = 0;
+        if((opcode & 0b00010000) == 0) mem = (state->B << 8) + state->C;
+        else mem = (state->D << 8) + state->E;
+
+        // stax = 000X0010, ldax = 000X1XXX
+        if((opcode & 0b00001000) == 0) state->MEMORY[mem] = state->A; // stax
+        else state->A = state->MEMORY[mem]; // ldax
+
+        goto increment;
+    }
+
+    increment:
+    state->PC += 1;
+    return;
 }

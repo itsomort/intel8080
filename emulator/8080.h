@@ -32,3 +32,5 @@ intel8080* cpu_init();
 void step(intel8080* state);
 void load_program(intel8080* state, const uint8_t* program, size_t size);
 void status(intel8080* state);
+void parity8(intel8080* state, uint8_t result);
+void parity16(intel8080* state, uint16_t result);

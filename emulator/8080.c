@@ -16,6 +16,33 @@ void load_program(intel8080* state, const uint8_t* program, size_t size) {
     }
 }
 
+void parity8(intel8080* state, uint8_t result) {
+    // typically, you would grab individual bits and XOR them
+    // to get the parity, but getting individual bits in C
+    // is harder than doing it with logic gates,
+    // so the comfort of regular programming languages comes to the rescue
+
+    bool even = true;
+    for(int i = 0; i < 8; i++) {
+        uint8_t a = result & (1 << i);
+        if(a != 0) even = !even;
+    }
+
+    state->P = even;
+}
+
+void parity16(intel8080* state, uint16_t result) {
+    // same as parity8 except i < 16
+
+    bool even = true;
+    for(int i = 0; i < 16; i++) {
+        uint16_t a = result & (1 << i);
+        if(a != 0) even = !even;
+    }
+
+    state->P = even;
+}
+
 void status(intel8080* state) {
     printf("REGISTERS:\n");
     printf("A: 0x%02x\n", state->A);
@@ -100,9 +127,22 @@ void step(intel8080* state) {
         
         uint8_t reg = (opcode & 0b00111000) >> 3;
         
+        // affects zero, sign, parity
     
-        if(reg == 6) state->MEMORY[(state->H << 8) + state->L] += add;
-        else *registers[reg] += add;
+        uint8_t result;
+
+        if(reg == 6) {
+            state->MEMORY[(state->H << 8) + state->L] += add;
+            result = state->MEMORY[(state->H << 8) + state->L];
+        }
+        else {
+            registers[reg] += add;
+            result = registers[reg];
+        }
+
+        state->Z = result == 0;
+        state->S = (result >> 7);
+        parity8(state, result);
 
         goto increment;
     }
@@ -148,6 +188,12 @@ void step(intel8080* state) {
         else state->A = state->MEMORY[mem]; // ldax
 
         goto increment;
+    }
+
+    // REGISTER/MEMORY ACCUMULATOR INSTRUCTIONS
+    if(((opcode & 0b11000000) ^ rmai) == 0) {
+        // stopping now and then finishing docs
+        return;
     }
 
     increment:

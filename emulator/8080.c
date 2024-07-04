@@ -192,7 +192,61 @@ void step(intel8080* state) {
 
     // REGISTER/MEMORY ACCUMULATOR INSTRUCTIONS
     if(((opcode & 0b11000000) ^ rmai) == 0) {
-        // stopping now and then finishing docs
+        uint8_t *registers[8] = {
+            &state->B, &state->C,
+            &state->D, &state->E,
+            &state->H, &state->L,
+            NULL,      &state->A
+        };
+
+        uint8_t reg = (opcode & 0b00000111);
+        uint8_t value;
+        if(reg == 6) value = state->MEMORY[(state->H) << 8 + state->L];
+        else value = *registers[reg]; 
+
+        uint8_t operation = (opcode & 0b00111000) >> 3;
+        uint16_t result;
+
+        switch(operation) {
+            case 0: // ADD
+                result = state->A + value;
+                state->A = (uint8_t) result;
+                state->CF = (result > 255);
+                state->Z = (state->A == 0);
+                parity8(state, state->A);
+            break;
+
+            case 1: // ADC
+                result = state->A + value + state->CF;
+                state->A = (uint8_t) result;
+                state->CF = (result > 255);
+                state->Z = (state->A == 0);
+                parity8(state, state->A);
+            break;
+
+            case 2: // SUB
+            break;
+
+            case 3: // SBB
+            break;
+
+            case 4: // ANA
+            break;
+
+            case 5: // XRA
+            break;
+
+            case 6: // ORA
+            break;
+
+            case 7: // CMP
+            break;
+
+            default:
+                printf("somehow got an operation that is not 1-7");
+        }
+        
+
         return;
     }
 

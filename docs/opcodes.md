@@ -75,3 +75,55 @@ Moves one byte from Source to Destination. Source remains unchanged.
 `LDAX`: Contents of memory pointed to by Register Pair B or Register Pair D loaded into accumulator
 
 For both `STAX` and `LDAX`, B/D are the upper bits and C/E are the lower bits. EX: `B=0x13`, `C=0xEA`, Address = `$13EA` not `$EA13`.
+
+## Register/Memory Accumulator Instructions
+
+Format: `10 XXX YYY` \
+`XXX =` Operation \
+`YYY =` Register
+
+| Operation | Code | Register | Code |
+|:-:|:-:|:-:|:-:|
+|`ADD`| 000 | B  | 000 |
+|`ADC`| 001 | C  | 001 |
+|`SUB`| 010 | D  | 010 |
+|`SBB`| 011 | E  | 011 |
+|`ANA`| 100 | H  | 100 |
+|`XRA`| 101 | L  | 101 |
+|`ORA`| 110 | M* | 110 |
+|`CMP`| 111 | A  | 111 |
+
+M\*: Address in memory pointed to by the H and L registers
+
+### Operations:
+- `ADD`
+  - Add value from register/memory to accumulator
+  - Affects: C, S, Z, P, AC
+- `ADC`
+  - Add value from register/memory to accumulator **PLUS** carry
+  - Affects: C, S, Z, P, AC
+- `SUB`
+  - Subtract register/memory from accumulator using two's complement
+  - Affects: C, S, Z, P, AC
+- `SBB`
+  - Subtract register/memory from accumulator with borrow
+  - Add carry to register/memory, then subtract from accumulator
+  - Affects: C, S, Z, P, AC
+- `ANA`:
+  - Logical AND with A, reset carry
+  - Affects: C, S, Z, P
+- `XRA`
+  - Logical XOR with A, reset carry
+  - Affects: C, S, Z, P
+- `ORA`
+  - Logical OR with A, reset carry
+  - Affects: C, S, Z, P
+- `CMP`
+  - Compare register/memory with A with subtraction
+  - If A - value = 0, then reg = A
+  - Carry will be set if no carry out meaning reg > A
+  -  | REG vs A | Z | C | 
+     |:-:|:-:|:-:|
+     | REG = A | 1 | 0 |
+     | REG > A | 0 | 1 |
+     | REG < A | 0 | 0 |

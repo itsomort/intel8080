@@ -127,3 +127,37 @@ M\*: Address in memory pointed to by the H and L registers
      | REG = A | 1 | 0 |
      | REG > A | 0 | 1 |
      | REG < A | 0 | 0 |
+
+## Immediate Instructions
+
+### LXI - Load Immediate Register Pair (not entirely sure on the name...)
+
+Format: `00XX0001 DATA DATA`, each `DATA = 8 bits` \
+`XX` = Chosen register pair \
+|Register Pair|Code|
+|:-:|:-:|
+|B/C|00|
+|D/E|01|
+|H/L|10|
+|SP|11|
+
+Little endian, first operand (8 bits) moved into second register of pair, second operand (8 bits) moved into first register of pair. In case of stack pointer, load first data into lower bytes, load second data into higher bytes.
+
+### MVI - Move Immediate Data
+
+Format: `00XXX110 DATA`, `DATA = 8 bits` \
+`XXX` = Chosen Register 
+| Register | Code |
+|:-:|:-:|
+| B | 000 |
+| C | 100 |
+| D | 010 |
+| E | 011 |
+| H | 100 |
+| L | 101 |
+| M*| 110 |
+| A | 111 |
+
+M\*: Address in memory pointed to by the H and L registers
+
+8 bits of data get loaded into the chosen register or memory in the case of M*.

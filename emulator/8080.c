@@ -168,8 +168,8 @@ void step(intel8080* state) {
         uint8_t src = (opcode & 0b00000111);
 
         if(src == 6) *registers[dest] = state->MEMORY[(state->H << 8) + state->L];
-        else if(dest == 6) state->MEMORY[(state->H << 8) + state->L] = *registers[src];
-        else *registers[dest] = *registers[src];
+        else if(dest == 6) state->MEMORY[(state->H << 8) + state->L] = *(registers[src]);
+        else *(registers[dest]) = *(registers[src]);
 
         goto increment;
     }
@@ -246,8 +246,28 @@ void step(intel8080* state) {
                 printf("somehow got an operation that is not 1-7");
         }
         
+        goto increment;
+    }
 
-        return;
+
+    // MVI - Move Immediate Data
+
+    if(((opcode & 0b11000111) ^ mvip) == 0) {
+        uint8_t *registers[8] = {
+            &state->B, &state->C,
+            &state->D, &state->E,
+            &state->H, &state->L,
+            NULL,      &state->A
+        };
+
+        uint8_t reg = (opcode & 0b00111000) >> 3;
+        uint8_t data = state->MEMORY[state->PC + 1];
+
+        if(reg == 6) state->MEMORY[(state->H << 8) + (state->L)] = data;
+        else *(registers[reg]) = data;
+
+        state->PC += 1;
+        goto increment;
     }
 
     increment:

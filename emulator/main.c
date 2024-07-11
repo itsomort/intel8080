@@ -4,13 +4,14 @@
 
 int main() {
     intel8080* state = cpu_init();
-    int size = 5;
+    int size = 10;
 
-    load_program(state, ldax, size);
+    load_program(state, add_test, size);
     status(state);
     for(int i = 0; i < size; i++) {
         step(state);
         status(state);
+        getchar();
     }
-    printf("%x\n", state->MEMORY[(state->B << 8) + state->C]);
+    // printf("%x\n", state->MEMORY[(state->H << 8) + state->L]);
 }

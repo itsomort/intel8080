@@ -101,7 +101,7 @@ void step(intel8080* state) {
     // CARRY BIT INSTRUCTIONS
     if(((opcode & 0b11110111) ^ crbi) == 0) {
         // 00110111 == STC, // 00111111 == CMC
-        if(opcode & 0b00001000 == 0) state->CF = true; // STC = set carry = 1
+        if((opcode & 0b00001000) == 0) state->CF = true; // STC = set carry = 1
         else state->CF = !(state->CF); // CMC = invert carry flag
 
         goto increment;
@@ -123,7 +123,7 @@ void step(intel8080* state) {
         // if incrementing
         int add = 1;
         // if decrementing
-        if(opcode & 0b00000001 == 1) add = -1;
+        if((opcode & 0b00000001) == 1) add = -1;
         
         uint8_t reg = (opcode & 0b00111000) >> 3;
         
@@ -137,7 +137,7 @@ void step(intel8080* state) {
         }
         else {
             registers[reg] += add;
-            result = registers[reg];
+            result = *registers[reg];
         }
 
         state->Z = result == 0;
@@ -201,7 +201,7 @@ void step(intel8080* state) {
 
         uint8_t reg = (opcode & 0b00000111);
         uint8_t value;
-        if(reg == 6) value = state->MEMORY[(state->H) << 8 + state->L];
+        if(reg == 6) value = state->MEMORY[((state->H) << 8) + state->L];
         else value = *registers[reg]; 
 
         uint8_t operation = (opcode & 0b00111000) >> 3;
@@ -225,6 +225,12 @@ void step(intel8080* state) {
             break;
 
             case 2: // SUB
+                // uint8_t comp = (~value) + 1;
+                // result = (uint8_t) state->A + comp;
+                // state->CF = !(result > 255);
+                // state->Z = (state->A == 0);
+                // state->S = (state->A >> 7);
+                // parity8(state, state->A);
             break;
 
             case 3: // SBB
@@ -249,6 +255,32 @@ void step(intel8080* state) {
         goto increment;
     }
 
+
+    // LXI - Load Immediate Register Pair
+
+    if(((opcode & 0b11001111) ^ lxip) == 0) {
+        uint8_t reg = (opcode & 0b00110000) >> 4;
+        if(reg == 0) { // reg = B/C
+            state->C = state->MEMORY[state->PC + 1];
+            state->B = state->MEMORY[state->PC + 2];
+        }
+        else if(reg == 1) { // reg = D/E
+            state->E = state->MEMORY[state->PC + 1];
+            state->D = state->MEMORY[state->PC + 2];
+        }
+        else if(reg == 2) { // reg = H/L
+            state->L = state->MEMORY[state->PC + 1];
+            state->H = state->MEMORY[state->PC + 2];
+        }
+        else if(reg == 3) { // reg = SP
+            uint8_t dataL = state->MEMORY[state->PC + 1];
+            uint8_t dataH = state->MEMORY[state->PC + 2];
+            state->SP = (dataH << 8) + dataL;
+        }
+        
+        state->PC += 2;
+        goto increment;
+    }
 
     // MVI - Move Immediate Data
 

@@ -132,8 +132,10 @@ M\*: Address in memory pointed to by the H and L registers
 
 ### LXI - Load Immediate Register Pair (not entirely sure on the name...)
 
-Format: `00XX0001 DATA DATA`, each `DATA = 8 bits` \
+Format: `00XX0001 DAT1 DAT2`, each `DATA = 8 bits` \
 `XX` = Chosen register pair \
+`DAT1` = Lower Bits \
+`DAT2` = Higher Bits
 |Register Pair|Code|
 |:-:|:-:|
 |B/C|00|

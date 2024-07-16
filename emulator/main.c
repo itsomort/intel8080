@@ -4,9 +4,9 @@
 
 int main() {
     intel8080* state = cpu_init();
-    int size = 10;
+    int size = 5;
 
-    load_program(state, add_test, size);
+    load_program(state, andorxor, size);
     status(state);
     for(int i = 0; i < size; i++) {
         step(state);

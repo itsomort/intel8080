@@ -206,6 +206,7 @@ void step(intel8080* state) {
 
         uint8_t operation = (opcode & 0b00111000) >> 3;
         uint16_t result;
+        uint8_t comp;
 
         switch(operation) {
             case 0: // ADD
@@ -225,27 +226,54 @@ void step(intel8080* state) {
             break;
 
             case 2: // SUB
-                // uint8_t comp = (~value) + 1;
-                // result = (uint8_t) state->A + comp;
-                // state->CF = !(result > 255);
-                // state->Z = (state->A == 0);
-                // state->S = (state->A >> 7);
-                // parity8(state, state->A);
+                comp = (~value) + 1;
+                result = (uint8_t) state->A + comp;
+                state->CF = (value > state->A);
+                state->A = result;
+                state->Z = (state->A == 0);
+                state->S = (state->A >> 7);
+                parity8(state, state->A);
             break;
 
             case 3: // SBB
+                comp = (~value) + 1;
+                result = (uint8_t) state->A + comp - state->CF;
+                state->CF = (value > state->A);
+                state->A = result;
+                state->Z = (state->A == 0);
+                state->S = (state->A >> 7);
+                parity8(state, state->A);
             break;
 
             case 4: // ANA
+                state->A &= value;
+                state->CF = false;
+                state->Z = (state->A == 0);
+                state->S = (state->A >> 7);
+                parity8(state, state->A);
             break;
 
             case 5: // XRA
+                state->A ^= value;
+                state->CF = false;
+                state->Z = (state->A == 0);
+                state->S = (state->A >> 7);
+                parity8(state, state->A);
             break;
 
             case 6: // ORA
+                state->A |= value;
+                state->CF = false;
+                state->Z = (state->A == 0);
+                state->S = (state->A >> 7);
+                parity8(state, state->A);
             break;
 
             case 7: // CMP
+                state->Z = false;
+                state->CF = false;
+                if(value > state->A) state->CF = true;
+                else if(value == state->A) state->Z = true; 
             break;
 
             default:

@@ -330,6 +330,34 @@ void step(intel8080* state) {
         goto increment;
     }
 
+    // RLC, RRC, RAL, RAR : Accumulator Rotation
+    if(((opcode & 0b11100111) ^ rtai) == 0) {
+        int operation = (opcode &0b00011000) >> 3;
+        uint8_t temp;
+        if(operation == 0) { // RLC
+            state->CF = ((state->A) >> 7) & 1; // high order bit
+            state->A = (state->A >> 7) | (state->A << 1);
+        }
+        else if(operation == 1) { // RRC
+            state->CF = (state->A) & 1; // low order bit
+            state->A = (state->A >> 1) | (state->A << 7); 
+        }
+        else if(operation == 2) { // RAL
+            temp = state->CF;
+            state->CF = ((state->A) >> 7) & 1; // cf = MSB
+            state->A = ((state->A) << 1); // rotate left no wraparound, LSB=0
+            state->A |= temp; // set LSB = CF
+        }
+        else { // RAR
+            temp = state->CF;
+            state->CF = (state->A) & 1; // cf = LSB
+            state->A = ((state->A) >> 1); // rotate right no wraparound, MSB=0
+            state->A |= (temp << 7); // set MSB = cf;
+        }
+
+        goto increment;
+    }
+
     increment:
     state->PC += 1;
     return;

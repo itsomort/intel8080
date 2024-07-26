@@ -163,3 +163,24 @@ Format: `00XXX110 DATA`, `DATA = 8 bits` \
 M\*: Address in memory pointed to by the H and L registers
 
 8 bits of data get loaded into the chosen register or memory in the case of M*.
+
+## Rotation Instructions
+Format: `000XX111`, `XX` = Operation
+
+| Operation | Mnemonic | Code
+|:-:|:-:|:-:|
+Rotate Accumulator Left | RLC | 00
+Rotate Accumulator Right | RRC | 01
+Rotate Accumulator Left Through Carry | RAL | 10
+Rotate Accumulator Right Through Carry | RAR | 11
+
+- ### RLC:
+  - Rotate Accumulator Left, carry bit = MSB
+  - High order bit transferred to LSB
+- ### RRC:
+  - Rotate Accumulator Right, carry bit = LSB
+  - Low order bit transferred to MSB
+- ### RAL:
+  - Rotate Left Through Carry, Carry -> Temp, MSB -> Carry, rotate left, Temp -> LSB
+- ### RAR:
+  - Rotate Right Through Carry, Carry -> Temp, LSB -> Carry, rotate right, Temp -> MSB

@@ -191,7 +191,8 @@ void step(intel8080* state) {
     }
 
     // REGISTER/MEMORY ACCUMULATOR INSTRUCTIONS
-    if(((opcode & 0b11000000) ^ rmai) == 0) {
+    // IMMEDIATE ARITHMETIC INSTRUCTIONS
+    if(((opcode & 0b11000000) ^ rmai) == 0 || ((opcode & 0b11000111) ^ imop) == 0) {
         uint8_t *registers[8] = {
             &state->B, &state->C,
             &state->D, &state->E,
@@ -201,8 +202,18 @@ void step(intel8080* state) {
 
         uint8_t reg = (opcode & 0b00000111);
         uint8_t value;
-        if(reg == 6) value = state->MEMORY[((state->H) << 8) + state->L];
-        else value = *registers[reg]; 
+        // can do something a little tricky here...
+        // if a register/memory instruction, get value from register/memory
+        if(((opcode & 0b11000000) ^ rmai) == 0) {
+            if(reg == 6) value = state->MEMORY[((state->H) << 8) + state->L];
+            else value = *registers[reg]; 
+        }
+        // if an immediate arithmetic instruction, get immediate value
+        else {
+            value = state->MEMORY[state->PC + 1];
+        }
+
+        
 
         uint8_t operation = (opcode & 0b00111000) >> 3;
         uint16_t result;

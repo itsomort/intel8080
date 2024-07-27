@@ -164,6 +164,24 @@ M\*: Address in memory pointed to by the H and L registers
 
 8 bits of data get loaded into the chosen register or memory in the case of M*.
 
+### Immediate Arithmetic Instructions
+
+Format: `11XXX110 DATA`, `XXX` = Operation, `DATA = 8 bits` \
+Note: All instructions function on accumulator.
+
+| Operation | Code | Equivalent
+|:-:|:-:|:-:|
+| `ADI` | 000 | `ADD` |
+| `ACI` | 001 | `ADC` |
+| `SUI` | 010 | `SUB` |
+| `SBI` | 011 | `SBB` |
+| `ANI` | 100 | `ANA` |
+| `XRI` | 101 | `XRA` |
+| `ORI` | 110 | `ORA` |
+| `CPI` | 111 | `CMP` |
+
+These operations function the exact same as the non-immediate versions (`ADD`, `ADC`, etc.) so their behavior will not be gone into detail here. For details, look at the equivalent operation in the Register/Memory Accumulator Instructions section.
+
 ## Rotation Instructions
 Format: `000XX111`, `XX` = Operation
 

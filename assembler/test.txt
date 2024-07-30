@@ -1,0 +1,4 @@
+MOV A, C
+INR B
+CMC
+LDAX

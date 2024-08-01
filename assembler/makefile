@@ -1,2 +1,2 @@
-hellomake: src/initialize.cpp
-	g++ -o main src/initialize.cpp
+hellomake: src/assembler.cpp
+	g++ -o main src/assembler.cpp

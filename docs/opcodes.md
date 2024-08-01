@@ -1,5 +1,26 @@
 # Opcodes/Instructions
 
+## Instruction Types (for assembler)
+
+1 = carry bit\
+2 = single register (inr, drc, cma)\
+3 = NOP\
+4 = MOV\
+5 = LDAX/STAX\
+6 = reg/mem accumulator arithmetic\
+7 = LXI\
+8 = MVI\
+9 = immediate arithmetic\
+10 = rotation\
+11 = push/pop\
+12 = direct addressing\
+13 = jumps\
+14 = call\
+15 = ret\
+16 = register pair 1 (begins with 00)\
+17 = register pair 2 (begins with 111)\
+
+
 ## Carry Bit Instructions
 
 Format:`0011X111`
@@ -12,7 +33,7 @@ Format:`0011X111`
 | Register | Code |
 |:-:|:-:|
 | B | 000 |
-| C | 100 |
+| C | 001 |
 | D | 010 |
 | E | 011 |
 | H | 100 |

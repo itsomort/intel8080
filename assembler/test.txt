@@ -1,4 +1,5 @@
-MOV A, C
-INR B
+STC
 CMC
-LDAX
+CMA
+INR A
+DCR C

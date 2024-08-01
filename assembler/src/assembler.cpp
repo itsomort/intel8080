@@ -55,7 +55,7 @@ void assemble(std::map<std::string, std::pair<int, int>> map, std::ifstream *fil
 
 int main() {
     std::map<std::string, std::pair<int, int>> map = map_str();
-    std::ifstream file("test.txt");
+    std::ifstream file("test.asm");
     
     assemble(map, &file);
 }

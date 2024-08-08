@@ -2,4 +2,4 @@ main
 .vscode/
 emulator/.vscode/
 assembler/test.txt
-
+assembler/output.bin

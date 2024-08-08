@@ -73,7 +73,7 @@ Just as a note, doing `MOV` between two of the same registers is technically ano
 | Register | Code |
 |:-:|:-:|
 | B | 000 |
-| C | 100 |
+| C | 001 |
 | D | 010 |
 | E | 011 |
 | H | 100 |
@@ -173,7 +173,7 @@ Format: `00XXX110 DATA`, `DATA = 8 bits` \
 | Register | Code |
 |:-:|:-:|
 | B | 000 |
-| C | 100 |
+| C | 001 |
 | D | 010 |
 | E | 011 |
 | H | 100 |
